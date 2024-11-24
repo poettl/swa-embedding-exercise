@@ -1,13 +1,13 @@
 import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-# import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
-# https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
-# 384-dimensional embeddings
+# The current process just got forked. Disabling parallelism to avoid deadlocks
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2 --> 384-dimensional embeddings
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 requirements = [
@@ -17,8 +17,7 @@ requirements = [
 "A prepackaged product may contain simple products, but also other prepackaged products.",
 "So, a typical order consists of various amounts of various products (prepackaged ones and/or simple ones). ",
 "Each product has a unit (e.g. 100 grams) and a price per unit denominated in Euros.",
-"Currently, our customers can place orders only over the phone.",
-"To do so, they call our company number 384 29 734 and tell us their customer number.",
+"Currently, our customers can place orders only over the phone. To do so, they call our company number 384 29 734 and tell us their customer number.",
 "A customer number has seven digits that are preceded by a two-digit area code and followed by a one digit checksum.",
 "There are no collective orders of several customers.",
 "After the phone clerk has authenticated the customer (which includes checking that he is not blacklisted e.g. due to bad payment morale) the customer names one or several products to be added to the shopping cart.",
@@ -57,23 +56,33 @@ requirements = [
 "The system is supposed to print a business report for the manager every night automatically that lists the orders of a given day along with the product, the amount, the packing clerk and the delivery clerk, the customer, the customer’s address and the order number.",
 ]
 
+# Generate embeddings
 embeddings = model.encode(requirements)
 embedding_matrix = np.array(embeddings)
-# dimension = embedding_matrix.shape[1]
-# index = faiss.IndexFlatL2(dimension)
-# index.add(embedding_matrix)
-num_clusters = 5
-kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+
+
+# Determine the optimal number of clusters
+range_n_clusters = range(2, 10)
+best_n_clusters = 2
+best_silhouette_score = -1
+
+for n_clusters in range_n_clusters:
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+    cluster_labels = kmeans.fit_predict(embedding_matrix)
+    silhouette_avg = silhouette_score(embedding_matrix, cluster_labels)
+    if silhouette_avg > best_silhouette_score:
+        best_silhouette_score = silhouette_avg
+        best_n_clusters = n_clusters
+
+print(f"\nOptimal number of clusters: {best_n_clusters}\n")
+
+kmeans = KMeans(n_clusters=best_n_clusters, random_state=42)
 kmeans.fit(embedding_matrix)
 cluster_labels = kmeans.labels_
 
-
 clusters = {}
 for idx, label in enumerate(cluster_labels):
-    if label not in clusters:
-        clusters[label] = []
-    clusters[label].append(requirements[idx])
-
+    clusters.setdefault(label, []).append(requirements[idx])
 
 for cluster, reqs in clusters.items():
     print(f"Cluster {cluster}:")

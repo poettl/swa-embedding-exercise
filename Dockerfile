@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY embedding.py .
 RUN pip install --upgrade pip
-RUN pip install sentence-transformers scikit-learn faiss-cpu
+RUN pip install sentence-transformers scikit-learn
 
 RUN python -c "from sentence_transformers import SentenceTransformer; model = SentenceTransformer('all-MiniLM-L6-v2')"
 

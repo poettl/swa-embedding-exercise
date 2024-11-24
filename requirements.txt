@@ -4,8 +4,7 @@ Of course, our customers can also assemble an individual breakfast to their tast
 A prepackaged product may contain simple products, but also other prepackaged products.
 So, a typical order consists of various amounts of various products (prepackaged ones and/or simple ones). 
 Each product has a unit (e.g. 100 grams) and a price per unit denominated in Euros.
-Currently, our customers can place orders only over the phone.
-To do so, they call our company number 384 29 734 and tell us their customer number.
+Currently, our customers can place orders only over the phone. To do so, they call our company number 384 29 734 and tell us their customer number.
 A customer number has seven digits that are preceded by a two-digit area code and followed by a one digit checksum.
 There are no collective orders of several customers.
 After the phone clerk has authenticated the customer (which includes checking that he is not blacklisted e.g. due to bad payment morale) the customer names one or several products to be added to the shopping cart.
