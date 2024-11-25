@@ -4,7 +4,6 @@ from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
-# The current process just got forked. Disabling parallelism to avoid deadlocks
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2 --> 384-dimensional embeddings
@@ -56,12 +55,10 @@ requirements = [
 "The system is supposed to print a business report for the manager every night automatically that lists the orders of a given day along with the product, the amount, the packing clerk and the delivery clerk, the customer, the customer’s address and the order number.",
 ]
 
-# Generate embeddings
 embeddings = model.encode(requirements)
 embedding_matrix = np.array(embeddings)
 
 
-# Determine the optimal number of clusters
 range_n_clusters = range(2, 10)
 best_n_clusters = 2
 best_silhouette_score = -1
